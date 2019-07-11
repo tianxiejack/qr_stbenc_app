@@ -41,16 +41,13 @@ CMenu::~CMenu()
 
 void CMenu::menuBackground()
 {
-
 	gpatMenu->draw(true);
-
 	return;
 }
 
 void CMenu::eraseMenuBackground()
 {
 	gpatMenu->draw(false);
-	//gpatMenu->updatedata();
 	return;
 }
 

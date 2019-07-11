@@ -52,7 +52,7 @@ static void processFrame_core(int cap_chid,unsigned char *src, struct v4l2_buffe
 				OSA_assert(format == V4L2_PIX_FMT_YUYV);
 				frame = cv::Mat(SYS_CHN_HEIGHT(cap_chid), SYS_CHN_WIDTH(cap_chid)*2, CV_8UC1, src);
 			}
-
+			#if 0
 			//Uint32 curTm = (OSA_getCurTimeInMsec())>>3;
 			static float curTm = 0.0;
 			int offsetY = (frame.rows-20)*fabs(sin(curTm*CV_PI/180.0));
@@ -60,6 +60,7 @@ static void processFrame_core(int cap_chid,unsigned char *src, struct v4l2_buffe
 			int offsetX = (frame.cols-20)*fabs(sin(curTm*CV_PI/180.0));
 			cv::rectangle(frame, cv::Rect(offsetX, frame.rows-20, 20, 20), cv::Scalar(255), -1);
 			curTm += 0.5;
+			#endif
 		}
 		core->processFrame(cap_chid, src, capInfo, format);
 	}
@@ -141,6 +142,7 @@ static int iMenu = 0;
 static int chrChId = 0;
 static void keyboard_event(unsigned char key, int x, int y)
 {
+	#if 1
 	cv::Size winSize(80, 60);
 	static int fovId[SYS_CHN_CNT] = {0,0};
 	static bool mmtdEnable = false;
@@ -441,6 +443,7 @@ static void keyboard_event(unsigned char key, int x, int y)
 		printf("%s",strMenus[iMenu]);
 		break;
 	}
+	#endif
 }
 
 
@@ -490,6 +493,27 @@ static int callback_process(void *handle, int chId, Mat frame, struct v4l2_buffe
 	return 0;
 }
 
+
+static void mouse_event(int button, int state, int x, int y)
+{
+	if(button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
+	{
+
+		printf("left  down \n");
+	}
+	else if(button == GLUT_LEFT_BUTTON && state == GLUT_UP)
+	{
+		printf("left  UP \n");
+
+	}
+	else if(button == GLUT_RIGHT_BUTTON && state == GLUT_UP)
+		printf("RIGHT  UP \n");
+	else if(button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN)
+		printf("RIGHT  down \n");
+	return;
+}
+
+
 static CORE1001_INIT_PARAM initParam;
 static bool bLoop = true;
 static char strIpAddr[32] = "192.168.1.88";
@@ -530,9 +554,12 @@ int main_core(int argc, char **argv)
 	MultiCh.creat();
 	MultiCh.run();
 
+	core->enableOSD(false);
+
 	if(initParam.bRender){
 		start_thread(thrdhndl_keyevent, &initParam.bRender);
 		glutKeyboardFunc(keyboard_event);
+		glutMouseFunc(mouse_event);
 		glutMainLoop();
 	}else{
 		thrdhndl_keyevent(&initParam.bRender);

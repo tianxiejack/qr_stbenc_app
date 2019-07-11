@@ -9,7 +9,7 @@
 #define CRCORE_HPP_
 
 /***********************************************
- * core version 2.0.3
+ * core version 2.0.4
  *
  * 20/12/2018 motify: CORE1001_INIT_PARAM::renderHook
  *	enum{ RUN_ENTER = 0, RUN_WIN, RUN_SWAP, RUN_LEAVE };
@@ -38,12 +38,13 @@
  * 09/07/2019 motify: v2.0.3
  *                    void* QureyObj(int objId)
  *                    crcoreRender.hpp CCoreRenderBase
+ * 11/07/2019 motify: v2.0.4
  *
  */
 #include "osa.h"
 #include "osa_sem.h"
 
-#define CORE_1001_VERSION_  "2.0.3"
+#define CORE_1001_VERSION_  "2.0.4"
 
 #define COREID_1001			(0x10010000)
 
@@ -59,6 +60,8 @@ public:
 	virtual void processFrame(int chId, unsigned char *data, struct v4l2_buffer capInfo, int format) = 0;
 };
 
+////////////////////////////////////////////////////////////
+//   core stats
 #define CORE_CHN_MAX	(4)
 #define CORE_TGT_NUM_MAX	(32)
 typedef struct{
@@ -108,6 +111,8 @@ typedef struct _core_1001_stats{
 	float renderSched;
 }CORE1001_STATS;
 
+//////////////////////////////////////////////////////////////
+// core init paramers
 typedef struct _core_1001_chnInfo_init{
 	cv::Size imgSize;
 	int format;
@@ -144,6 +149,38 @@ typedef struct _core_1001_init2{
 	CGluVideoWindow *videoWindow;
 }CORE1001_INIT_PARAM2;
 
+/////////////////////////////////////////////////////////////
+//
+typedef struct _core_stab_param
+{
+	enum MotionModel
+	{
+	    MM_TRANSLATION = 0,
+	    MM_TRANSLATION_AND_SCALE = 1,
+	    MM_ROTATION = 2,
+	    MM_RIGID = 3,
+	    MM_SIMILARITY = 4,
+	    MM_AFFINE = 5,
+	    MM_HOMOGRAPHY = 6,
+	    MM_STABILIZER = 7,
+	    MM_UNKNOWN = 8
+	};
+	MotionModel mm;
+	double noise_cov;
+	bool bBorderTransparent;
+	float cropMargin;
+	bool bCropMarginScale;
+	bool bFixedPos;
+	_core_stab_param(){
+		mm = MM_TRANSLATION;
+		noise_cov = 1E-4;
+		bBorderTransparent = false;
+		cropMargin = -1.0f;
+		bCropMarginScale = false;
+		bFixedPos = false;
+	}
+}CORE_STAB_PARAM;
+
 enum{	 RENDER_HOOK_RUN_ENTER = 0, RENDER_HOOK_RUN_WIN,	RENDER_HOOK_RUN_SWAP,	RENDER_HOOK_RUN_LEAVE };
 typedef cv::Rect_<float> Rect2f;
 
@@ -160,8 +197,8 @@ public:
 	virtual int enableMotionDetect(bool enable) = 0;
 	virtual int enableEnh(bool enable) = 0;
 	virtual int enableEnh(int chId, bool enable) = 0;
-	virtual int enableStab(bool enable, float cropMargin, bool bScale, bool bBorderTransparent) = 0;
-	virtual int enableStab(int chId, bool enable, float cropMargin, bool bScale, bool bBorderTransparent) = 0;
+	virtual int enableStab(bool enable, const CORE_STAB_PARAM& params) = 0;
+	virtual int enableStab(int chId, bool enable, const CORE_STAB_PARAM& params) = 0;
 	virtual int enableBlob(bool enable) = 0;
 	virtual int bindBlend(int blendchId, const cv::Matx44f& matric) = 0;
 	virtual int bindBlend(int chId, int blendchId, const cv::Matx44f& matric) = 0;

@@ -56,7 +56,7 @@ typedef struct{
 
 class CMenu{
 public:
-	CMenu();
+	CMenu(void* pfun);
 	~CMenu();
 
 	void menuButton();
@@ -87,6 +87,10 @@ public:
 
 	unsigned char getIndex(int x,int y);
 
+	void setStbworkmode();
+	void setStbparam();
+	void enhHandle();
+	void stbHandle();
 
 	void getRGBA(int color,unsigned char& r,unsigned char& g,unsigned char& b,unsigned char& a);
 
@@ -97,7 +101,7 @@ private:
 
 	unsigned char m_menuPointer,m_stbmode,m_stbparam;
 	signed char m_menuStat;
-
+	
 };
 
 

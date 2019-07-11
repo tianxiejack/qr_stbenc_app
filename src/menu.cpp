@@ -13,14 +13,20 @@
 #include <wchar.h>
 #include "crosd.hpp"
 
+#include "crCore.hpp"
+
+CORE_STAB_PARAM gparams;
+static ICore_1001 *gcore = NULL;
+
 
 const int CHARPOSX = (int)((float)OUTPUTW *0.78125f);
 const int CHARPOSY = (int)((float)OUTPUTH *0.056f);
 
 
-CMenu::CMenu():m_menuStat(0),m_enhStat(false),m_stbStat(false),m_paramStat(false),
+CMenu::CMenu(void* pfun):m_menuStat(0),m_enhStat(false),m_stbStat(false),m_paramStat(false),
 			m_menuPointer(255),m_stbmode(0),m_stbparam(0)
 {
+	gcore = (ICore_1001*)pfun;
 }
 
 
@@ -49,6 +55,18 @@ void CMenu::enter()
 	return;
 }
 
+void CMenu::enhHandle()
+{
+	gcore->enableEnh(m_enhStat);
+	return;
+}
+
+void CMenu::stbHandle()
+{
+	gcore->enableStab(m_stbStat, gparams);
+	return;
+}
+
 
 void CMenu::menuhandle_main()
 {
@@ -56,10 +74,12 @@ void CMenu::menuhandle_main()
 	{
 		case 0:
 			m_enhStat = !m_enhStat;
+			enhHandle();
 			updateEnhStatOsd();
 			break;
 		case 1:
 			m_stbStat = !m_stbStat;
+			stbHandle();
 			updateStbStatOsd();
 			break;	
 
@@ -73,6 +93,53 @@ void CMenu::menuhandle_main()
 		default:
 			break;
 	}
+	return;
+}
+
+void CMenu::setStbworkmode()
+{
+	switch(m_stbmode)
+	{
+		case MODE_AUTO:
+			gparams.mm = CORE_STAB_PARAM::MM_UNKNOWN;
+			break;
+		case MODE_TRANS:
+			gparams.mm = CORE_STAB_PARAM::MM_TRANSLATION;
+			break;
+		case MODE_TRANSSCALE:
+			gparams.mm = CORE_STAB_PARAM::MM_TRANSLATION_AND_SCALE;
+			break;
+		case MODE_RIGID:
+			gparams.mm = CORE_STAB_PARAM::MM_RIGID;
+			break;
+		case MODE_PERSPECTIVE:
+			gparams.mm = CORE_STAB_PARAM::MM_HOMOGRAPHY;
+			break;
+		default:
+			break;
+	}
+	gcore->enableStab(m_stbStat, gparams);	
+	return;
+}
+
+
+void CMenu::setStbparam()
+{
+	switch(m_stbparam)
+	{
+		case FILTER_HIGHT:
+			gparams.noise_cov = 1e-6;
+			break;
+		case FILTER_MID:
+			gparams.noise_cov = 1e-5;
+			break;
+		case FILTER_LOW:
+			gparams.noise_cov = 1e-4;
+			break;
+		default:
+			break;
+	}
+	gcore->enableStab(m_stbStat, gparams);	
 	return;
 }
 
@@ -100,10 +167,12 @@ void CMenu::menuhandle_param()
 			
 		case 3:
 			m_stbmode = (m_stbmode+1+MODE_MAX)%MODE_MAX;
+			setStbworkmode();
 			updateStbModeOsd();
 			break;
 		case 4:
 			m_stbparam = (m_stbparam+1+FILTER_MAX)%FILTER_MAX;
+			setStbparam();
 			updateStbFilterOsd();
 			break;
 		default:
@@ -121,9 +190,9 @@ void CMenu::menuButton()
 			gotoMainMenu();
 			break;
 		case MENU_MAIN:
+		case MENU_PARAM:
 			gotoBlankMenu();
 			break;
-
 		default:
 			break;
 	}
@@ -201,18 +270,18 @@ void CMenu::gotoParamMenu()
 void CMenu::updateEnhStatOsd()
 {
 	if(m_enhStat)
-		swprintf(disMenuBuf.osdBuffer[0].disMenu, 33, L"增强       开");
+		swprintf(disMenuBuf.osdBuffer[0].disMenu, 33, L"增强    开");
 	else
-		swprintf(disMenuBuf.osdBuffer[0].disMenu, 33, L"增强       关");
+		swprintf(disMenuBuf.osdBuffer[0].disMenu, 33, L"增强    关");
 	return;
 }
 
 void CMenu::updateStbStatOsd()
 {
 	if(m_stbStat)
-		swprintf(disMenuBuf.osdBuffer[1].disMenu, 33, L"稳像       开");
+		swprintf(disMenuBuf.osdBuffer[1].disMenu, 33, L"稳像    开");
 	else
-		swprintf(disMenuBuf.osdBuffer[1].disMenu, 33, L"稳像       关");
+		swprintf(disMenuBuf.osdBuffer[1].disMenu, 33, L"稳像    关");
 	return;
 }
 
@@ -222,19 +291,19 @@ void CMenu::updateStbModeOsd()
 	switch(m_stbmode)
 	{
 		case MODE_AUTO:
-			swprintf(disMenuBuf.osdBuffer[3].disMenu, 33, L"稳像模式   自  动");
+			swprintf(disMenuBuf.osdBuffer[3].disMenu, 33, L"稳像模式  自动");
 			break;
 		case MODE_TRANS:
-			swprintf(disMenuBuf.osdBuffer[3].disMenu, 33, L"稳像模式   平  移");
+			swprintf(disMenuBuf.osdBuffer[3].disMenu, 33, L"稳像模式  平移");
 			break;
 		case MODE_TRANSSCALE:
-			swprintf(disMenuBuf.osdBuffer[3].disMenu, 33, L"稳像模式   平移缩放");
+			swprintf(disMenuBuf.osdBuffer[3].disMenu, 33, L"稳像模式  平移缩放");
 			break;
 		case MODE_RIGID:
-			swprintf(disMenuBuf.osdBuffer[3].disMenu, 33, L"稳像模式   刚  性");
+			swprintf(disMenuBuf.osdBuffer[3].disMenu, 33, L"稳像模式  刚性");
 			break;
 		case MODE_PERSPECTIVE:
-			swprintf(disMenuBuf.osdBuffer[3].disMenu, 33, L"稳像模式   透  视");
+			swprintf(disMenuBuf.osdBuffer[3].disMenu, 33, L"稳像模式  透视");
 			break;
 		default:
 			break;
@@ -247,13 +316,13 @@ void CMenu::updateStbFilterOsd()
 	switch(m_stbparam)
 		{
 			case FILTER_HIGHT:
-				swprintf(disMenuBuf.osdBuffer[4].disMenu, 33, L"滤波参数    高");
+				swprintf(disMenuBuf.osdBuffer[4].disMenu, 33, L"滤波参数  高");
 				break;
 			case FILTER_MID:
-				swprintf(disMenuBuf.osdBuffer[4].disMenu, 33, L"滤波参数    中");
+				swprintf(disMenuBuf.osdBuffer[4].disMenu, 33, L"滤波参数  中");
 				break;
 			case FILTER_LOW:
-				swprintf(disMenuBuf.osdBuffer[4].disMenu, 33, L"滤波参数    低");
+				swprintf(disMenuBuf.osdBuffer[4].disMenu, 33, L"滤波参数  低");
 				break;
 			default:
 				break;
@@ -265,7 +334,7 @@ void CMenu::updateStbFilterOsd()
 
 void CMenu::menuOsdInit_main()
 {
-	unsigned char menubuf[MAX_SUBMENU][128] = 	{"增强       ", "稳像      ","稳像配置"};
+	unsigned char menubuf[MAX_SUBMENU][128] = 	{"增强", "稳像","稳像配置"};
 	disMenuBuf.cnt = 3;
 	for(int j = 0; j < disMenuBuf.cnt; j++)
 	{
@@ -282,7 +351,7 @@ void CMenu::menuOsdInit_main()
 
 void CMenu::menuOsdInit_param()
 {
-	unsigned char menubuf[MAX_SUBMENU][128] = 	{"稳像模式    " ,"滤波参数    "};
+	unsigned char menubuf[MAX_SUBMENU][128] = 	{"稳像模式" ,"滤波参数"};
 
 	disMenuBuf.cnt = 5;
 	for(int j = 3; j < disMenuBuf.cnt; j++)

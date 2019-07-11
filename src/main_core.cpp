@@ -287,7 +287,14 @@ static void keyboard_event(unsigned char key, int x, int y)
 	{
 		static bool stabEnable[SYS_CHN_CNT] = {false, };
 		stabEnable[chrChId] ^= 1;
-		core->enableStab(stabEnable[chrChId], -1.0f, false, false);
+		CORE_STAB_PARAM params;
+		params.mm = CORE_STAB_PARAM::MM_STABILIZER;
+		params.bBorderTransparent = false;
+		params.cropMargin = -1.0f;
+		params.bCropMarginScale = false;
+		params.noise_cov = 1e-6;
+		params.bFixedPos = false;
+		core->enableStab(stabEnable[chrChId], params);
 	}
 		break;
 	case 'g':
@@ -575,7 +582,7 @@ int main_core(int argc, char **argv)
 	MultiCh.run();
 	core->enableOSD(false);
 		
-	gMenu = new CMenu();
+	gMenu = new CMenu((void*)core);
 
 	if(initParam.bRender){
 		start_thread(thrdhndl_keyevent, &initParam.bRender);

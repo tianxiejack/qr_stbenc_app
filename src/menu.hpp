@@ -92,6 +92,9 @@ public:
 	void enhHandle();
 	void stbHandle();
 
+	void menuBackground();
+	void eraseMenuBackground();
+
 	void getRGBA(int color,unsigned char& r,unsigned char& g,unsigned char& b,unsigned char& a);
 
 private:

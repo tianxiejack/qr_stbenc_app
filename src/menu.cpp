@@ -12,11 +12,11 @@
 #include <stdio.h>
 #include <wchar.h>
 #include "crosd.hpp"
-
 #include "crCore.hpp"
 
 CORE_STAB_PARAM gparams;
 static ICore_1001 *gcore = NULL;
+cr_osd::IPattern* gpatMenu;
 
 
 const int CHARPOSX = (int)((float)OUTPUTW *0.78125f);
@@ -27,11 +27,31 @@ CMenu::CMenu(void* pfun):m_menuStat(0),m_enhStat(false),m_stbStat(false),m_param
 			m_menuPointer(255),m_stbmode(0),m_stbparam(0)
 {
 	gcore = (ICore_1001*)pfun;
+
+	cv::Mat mMenu(300, 250, CV_8UC4, cv::Scalar(0,0,255,100));
+	cv::Rect rc(1480, 720, mMenu.cols, mMenu.rows);
+	gpatMenu = cr_osd::IPattern::Create(mMenu, rc);
+	gpatMenu->draw(false);
 }
 
 
 CMenu::~CMenu()
 {
+}
+
+void CMenu::menuBackground()
+{
+
+	gpatMenu->draw(true);
+
+	return;
+}
+
+void CMenu::eraseMenuBackground()
+{
+	gpatMenu->draw(false);
+	//gpatMenu->updatedata();
+	return;
 }
 
 
@@ -181,6 +201,7 @@ void CMenu::menuButton()
 	switch(m_menuStat)
 	{
 		case MENU_BLANK:
+			menuBackground();
 			gotoMainMenu();
 			break;
 		case MENU_MAIN:
@@ -248,6 +269,7 @@ void CMenu::gotoBlankMenu()
 	m_menuPointer = 255;
 	m_menuStat = MENU_BLANK;
 	menuOsdInit_blank();
+	eraseMenuBackground();
 	return;
 }
 
@@ -386,10 +408,9 @@ unsigned char CMenu::getIndex(int x,int y)
 
 void CMenu::mouseHandle_main(int x,int y)
 {
+	disMenuBuf.osdBuffer[m_menuPointer].color = 6;
+	
 	m_menuPointer  = getIndex( x, y);
-
-	if(m_menuPointer < MAX_SUBMENU)
-		disMenuBuf.osdBuffer[m_menuPointer].color = 6;
 
 	if(m_menuPointer < MAX_SUBMENU)
 		disMenuBuf.osdBuffer[m_menuPointer].color = 3;

@@ -65,7 +65,10 @@ void CMenu::menuhandle_main()
 
 		case 2:
 			m_paramStat = !m_paramStat;
-			gotoParamMenu();
+			if(m_paramStat)
+				gotoParamMenu();
+			else
+				gotoMainMenu();
 			break;
 		default:
 			break;
@@ -78,17 +81,34 @@ void CMenu::menuhandle_param()
 {
 	switch(m_menuPointer)
 	{
+		case 0:
+			m_enhStat = !m_enhStat;
+			updateEnhStatOsd();
+			break;
+		case 1:
+			m_stbStat = !m_stbStat;
+			updateStbStatOsd();
+			break;	
+
+		case 2:
+			m_paramStat = !m_paramStat;
+			if(m_paramStat)
+				gotoParamMenu();
+			else
+				gotoMainMenu();
+			break;
+			
 		case 3:
 			m_stbmode = (m_stbmode+1+MODE_MAX)%MODE_MAX;
+			updateStbModeOsd();
 			break;
 		case 4:
 			m_stbparam = (m_stbparam+1+FILTER_MAX)%FILTER_MAX;
+			updateStbFilterOsd();
 			break;
 		default:
 			break;
 	}
-	updateStbModeOsd();
-	updateStbFilterOsd();
 	return;
 }
 

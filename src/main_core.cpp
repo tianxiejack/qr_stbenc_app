@@ -21,6 +21,9 @@
 #include "thread.h"
 #include "MultiChVideo.hpp"
 
+#include "menu.hpp"
+
+
 using namespace cv;
 
 #define WHITECOLOR 		0x008080FF
@@ -35,6 +38,9 @@ using namespace cv;
 
 static ICore_1001 *core = NULL;
 static CORE1001_STATS stats;
+
+static CMenu* gMenu = NULL;
+
 
 static void processFrame_core(int cap_chid,unsigned char *src, struct v4l2_buffer capInfo, int format)
 {
@@ -498,7 +504,7 @@ static void mouse_event(int button, int state, int x, int y)
 {
 	if(button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
 	{
-
+	
 		printf("left  down \n");
 	}
 	else if(button == GLUT_LEFT_BUTTON && state == GLUT_UP)
@@ -507,10 +513,21 @@ static void mouse_event(int button, int state, int x, int y)
 
 	}
 	else if(button == GLUT_RIGHT_BUTTON && state == GLUT_UP)
-		printf("RIGHT  UP \n");
+	{
+			gMenu->menuButton();
+	}
 	else if(button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN)
+	{
 		printf("RIGHT  down \n");
+	}	
 	return;
+}
+
+
+static void mousemove_event(GLint xMouse, GLint yMouse)
+{
+	gMenu->mouseMove(xMouse,yMouse);
+	return;	
 }
 
 
@@ -522,6 +539,9 @@ static char strIpAddr[32] = "192.168.1.88";
 extern UTCTRACK_HANDLE g_track;
 #include "MMTD.h"
 extern CMMTD *g_mmtd;
+
+
+
 
 int main_core(int argc, char **argv)
 {
@@ -553,13 +573,16 @@ int main_core(int argc, char **argv)
 	MultiCh.m_usrFunc = callback_process;
 	MultiCh.creat();
 	MultiCh.run();
-
 	core->enableOSD(false);
+		
+	gMenu = new CMenu();
+
 
 	if(initParam.bRender){
 		start_thread(thrdhndl_keyevent, &initParam.bRender);
 		glutKeyboardFunc(keyboard_event);
 		glutMouseFunc(mouse_event);
+		glutPassiveMotionFunc(mousemove_event);
 		glutMainLoop();
 	}else{
 		thrdhndl_keyevent(&initParam.bRender);

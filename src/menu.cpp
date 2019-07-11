@@ -49,7 +49,6 @@ void CMenu::enter()
 			
 		default:
 			break;
-	
 	}
   	showOsd();
 	return;
@@ -63,6 +62,7 @@ void CMenu::enhHandle()
 
 void CMenu::stbHandle()
 {
+	printf("m_stbStat = %d \n" , m_stbStat);
 	gcore->enableStab(m_stbStat, gparams);
 	return;
 }
@@ -101,7 +101,7 @@ void CMenu::setStbworkmode()
 	switch(m_stbmode)
 	{
 		case MODE_AUTO:
-			gparams.mm = CORE_STAB_PARAM::MM_UNKNOWN;
+			gparams.mm = CORE_STAB_PARAM::MM_STABILIZER;
 			break;
 		case MODE_TRANS:
 			gparams.mm = CORE_STAB_PARAM::MM_TRANSLATION;
@@ -118,6 +118,7 @@ void CMenu::setStbworkmode()
 		default:
 			break;
 	}
+	
 	gcore->enableStab(m_stbStat, gparams);	
 	return;
 }
@@ -139,6 +140,8 @@ void CMenu::setStbparam()
 		default:
 			break;
 	}
+	
+	printf("m_stbStat = %d \n" , m_stbStat);
 	gcore->enableStab(m_stbStat, gparams);	
 	return;
 }
@@ -148,21 +151,10 @@ void CMenu::menuhandle_param()
 {
 	switch(m_menuPointer)
 	{
-		case 0:
-			m_enhStat = !m_enhStat;
-			updateEnhStatOsd();
-			break;
+		case 0:		
 		case 1:
-			m_stbStat = !m_stbStat;
-			updateStbStatOsd();
-			break;	
-
 		case 2:
-			m_paramStat = !m_paramStat;
-			if(m_paramStat)
-				gotoParamMenu();
-			else
-				gotoMainMenu();
+			menuhandle_main();
 			break;
 			
 		case 3:
@@ -170,11 +162,13 @@ void CMenu::menuhandle_param()
 			setStbworkmode();
 			updateStbModeOsd();
 			break;
+			
 		case 4:
 			m_stbparam = (m_stbparam+1+FILTER_MAX)%FILTER_MAX;
 			setStbparam();
 			updateStbFilterOsd();
 			break;
+			
 		default:
 			break;
 	}
@@ -392,16 +386,14 @@ unsigned char CMenu::getIndex(int x,int y)
 
 void CMenu::mouseHandle_main(int x,int y)
 {
-	unsigned char index  = getIndex( x, y);
+	m_menuPointer  = getIndex( x, y);
 
 	if(m_menuPointer < MAX_SUBMENU)
 		disMenuBuf.osdBuffer[m_menuPointer].color = 6;
 
-	if(index < MAX_SUBMENU)
-	{
-		m_menuPointer = index;
+	if(m_menuPointer < MAX_SUBMENU)
 		disMenuBuf.osdBuffer[m_menuPointer].color = 3;
-	}
+	
 	return;
 }
 

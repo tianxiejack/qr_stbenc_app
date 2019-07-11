@@ -510,23 +510,13 @@ static int callback_process(void *handle, int chId, Mat frame, struct v4l2_buffe
 static void mouse_event(int button, int state, int x, int y)
 {
 	if(button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
-	{
-		gMenu->enter();
-		
-		printf("left  down \n");
-		
-	}
+		gMenu->enter();		
 	else if(button == GLUT_LEFT_BUTTON && state == GLUT_UP)
-		printf("left  UP \n");
+		;//printf("left  UP \n");
 	else if(button == GLUT_RIGHT_BUTTON && state == GLUT_UP)
-	{
-		printf("right  up \n");
-	}
+		;//printf("right  up \n");
 	else if(button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN)
-	{
 		gMenu->menuButton();
-		printf("RIGHT  down \n");
-	}
 	return;
 }
 

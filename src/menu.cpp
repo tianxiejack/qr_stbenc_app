@@ -18,7 +18,7 @@ const int CHARPOSX = (int)((float)OUTPUTW *0.78125f);
 const int CHARPOSY = (int)((float)OUTPUTH *0.056f);
 
 
-CMenu::CMenu():m_menuStat(0),m_enhStat(false),m_stbStat(false)
+CMenu::CMenu():m_menuStat(0),m_enhStat(false),m_stbStat(false),m_menuPointer(255)
 {
 	
 }
@@ -31,6 +31,7 @@ CMenu::~CMenu()
 
 void CMenu::enter()
 {
+	printf("enter   menustat = %d \n" ,m_menuStat );
 	switch(m_menuStat)
 	{
 		case MENU_MAIN:
@@ -47,7 +48,7 @@ void CMenu::enter()
 			break;
 	
 	}
-
+  
 	return;
 }
 
@@ -57,12 +58,17 @@ void CMenu::menuhandle_main()
 	switch(m_menuPointer)
 	{
 		case 0:
-			
+			m_enhStat = !m_enhStat;
+			updateEnhStatOsd();
 			break;
-
+		case 1:
+			m_stbStat = !m_stbStat;
+			updateStbStatOsd();
+			break;		
 		default:
 			break;
 	}
+	showOsd();
 	return;
 }
 
@@ -73,20 +79,27 @@ void CMenu::menuButton()
 	{
 		case MENU_BLANK:
 			gotoMainMenu();
-			showOsd();
 			break;
 		case MENU_MAIN:
 			gotoBlankMenu();
-			showOsd();
 			break;
 
 		default:
 			break;
 	}
-
+	showOsd();
 	return;
 }
 
+
+void CMenu::eraseOsd()
+{
+	for(int i = 0; i < MAX_SUBMENU; i++)
+	{
+		cr_osd::erase((void*)disMenuBuf.osdBuffer[i].disMenu);
+	}
+	return;
+}
 
 void CMenu::showOsd()
 {
@@ -98,6 +111,7 @@ void CMenu::showOsd()
 
 	cv::Point pos;
 
+	eraseOsd();
 	for(int i = 0; i < disMenuBuf.cnt; i++)
 	{
 		if(disMenuBuf.osdBuffer[i].bshow)
@@ -118,7 +132,7 @@ void CMenu::showOsd()
 
 void CMenu::gotoMainMenu()
 {
-	m_menuPointer = -1;
+	m_menuPointer = 255;
 	m_menuStat = MENU_MAIN;
 	menuOsdInit_main();
 	updateEnhStatOsd();
@@ -128,7 +142,7 @@ void CMenu::gotoMainMenu()
 
 void CMenu::gotoBlankMenu()
 {
-	m_menuPointer = -1;
+	m_menuPointer = 255;
 	m_menuStat = MENU_BLANK;
 	menuOsdInit_blank();
 	return;
@@ -152,9 +166,9 @@ void CMenu::updateEnhStatOsd()
 void CMenu::updateStbStatOsd()
 {
 	if(m_stbStat)
-		swprintf(disMenuBuf.osdBuffer[0].disMenu, 33, L"稳像       开");
+		swprintf(disMenuBuf.osdBuffer[1].disMenu, 33, L"稳像       开");
 	else
-		swprintf(disMenuBuf.osdBuffer[0].disMenu, 33, L"稳像       关");
+		swprintf(disMenuBuf.osdBuffer[1].disMenu, 33, L"稳像       关");
 	return;
 }
 
@@ -182,14 +196,14 @@ void CMenu::menuOsdInit_blank()
 }
 
 
-char CMenu::getIndex(int x,int y)
+unsigned char CMenu::getIndex(int x,int y)
 {
-	char ret = 0;
+	unsigned char ret = 255;
 
-	for(int i=1; i <= MAX_SUBMENU; i++)
+	for(int i=0; i < MAX_SUBMENU; i++)
 	if(x > CHARPOSX && x < CHARPOSX + 100)
 	{
-		if(y > (i)*CHARPOSY && y < (i+1)*CHARPOSY)
+		if(y > (i+1)*CHARPOSY && y < (i+2)*CHARPOSY)
 			ret = i;
 	}
 	return ret;	
@@ -198,12 +212,16 @@ char CMenu::getIndex(int x,int y)
 
 void CMenu::mouseHandle_main(int x,int y)
 {
-	char ret  = getIndex( x, y);
+	unsigned char index  = getIndex( x, y);
 
+	if(m_menuPointer < MAX_SUBMENU)
+		disMenuBuf.osdBuffer[m_menuPointer].color = 6;
 
-	printf("ret = %d \n" , ret);
-
-	
+	if(index < MAX_SUBMENU)
+	{
+		m_menuPointer = index;
+		disMenuBuf.osdBuffer[m_menuPointer].color = 3;
+	}
 	return;
 }
 
@@ -215,12 +233,11 @@ void CMenu::mouseMove(int xMove , int yMove)
 		case MENU_MAIN:
 			mouseHandle_main(xMove,yMove);
 			break;
-
+		
 		default:
 			break;
 	}
-	
-	
+	showOsd();
 	return;	
 }
 

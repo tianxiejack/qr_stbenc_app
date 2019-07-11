@@ -504,22 +504,22 @@ static void mouse_event(int button, int state, int x, int y)
 {
 	if(button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
 	{
-	
+		gMenu->enter();
+		
 		printf("left  down \n");
+		
 	}
 	else if(button == GLUT_LEFT_BUTTON && state == GLUT_UP)
-	{
 		printf("left  UP \n");
-
-	}
 	else if(button == GLUT_RIGHT_BUTTON && state == GLUT_UP)
 	{
-			gMenu->menuButton();
+		printf("right  up \n");
 	}
 	else if(button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN)
 	{
+		gMenu->menuButton();
 		printf("RIGHT  down \n");
-	}	
+	}
 	return;
 }
 
@@ -576,7 +576,6 @@ int main_core(int argc, char **argv)
 	core->enableOSD(false);
 		
 	gMenu = new CMenu();
-
 
 	if(initParam.bRender){
 		start_thread(thrdhndl_keyevent, &initParam.bRender);

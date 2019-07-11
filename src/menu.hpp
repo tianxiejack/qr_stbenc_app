@@ -50,6 +50,7 @@ public:
 	void mouseHandle_main(int x,int y);
 
 	void showOsd();
+	void eraseOsd();
 
 	void gotoBlankMenu();
 	void gotoMainMenu();
@@ -64,7 +65,7 @@ public:
 
 	void menuhandle_main();
 	
-	char getIndex(int x,int y);
+	unsigned char getIndex(int x,int y);
 
 
 	void getRGBA(int color,unsigned char& r,unsigned char& g,unsigned char& b,unsigned char& a);
@@ -74,7 +75,7 @@ private:
 	bool m_enhStat,m_stbStat;
 	osdInfo_t disMenuBuf;
 
-	signed char m_menuPointer;
+	unsigned char m_menuPointer;
 	signed char m_menuStat;
 
 };

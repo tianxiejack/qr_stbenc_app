@@ -18,9 +18,9 @@ const int CHARPOSX = (int)((float)OUTPUTW *0.78125f);
 const int CHARPOSY = (int)((float)OUTPUTH *0.056f);
 
 
-CMenu::CMenu():m_menuStat(0),m_enhStat(false),m_stbStat(false),m_menuPointer(255)
+CMenu::CMenu():m_menuStat(0),m_enhStat(false),m_stbStat(false),m_paramStat(false),
+			m_menuPointer(255),m_stbmode(0),m_stbparam(0)
 {
-	
 }
 
 
@@ -31,24 +31,21 @@ CMenu::~CMenu()
 
 void CMenu::enter()
 {
-	printf("enter   menustat = %d \n" ,m_menuStat );
 	switch(m_menuStat)
 	{
 		case MENU_MAIN:
 			menuhandle_main();
-
 			break;
 
-		case MENU_SEC:
-			
-				
+		case MENU_PARAM:
+			menuhandle_param();	
 			break;
 			
 		default:
 			break;
 	
 	}
-  
+  	showOsd();
 	return;
 }
 
@@ -64,11 +61,34 @@ void CMenu::menuhandle_main()
 		case 1:
 			m_stbStat = !m_stbStat;
 			updateStbStatOsd();
-			break;		
+			break;	
+
+		case 2:
+			m_paramStat = !m_paramStat;
+			gotoParamMenu();
+			break;
 		default:
 			break;
 	}
-	showOsd();
+	return;
+}
+
+
+void CMenu::menuhandle_param()
+{
+	switch(m_menuPointer)
+	{
+		case 3:
+			m_stbmode = (m_stbmode+1+MODE_MAX)%MODE_MAX;
+			break;
+		case 4:
+			m_stbparam = (m_stbparam+1+FILTER_MAX)%FILTER_MAX;
+			break;
+		default:
+			break;
+	}
+	updateStbModeOsd();
+	updateStbFilterOsd();
 	return;
 }
 
@@ -149,9 +169,13 @@ void CMenu::gotoBlankMenu()
 }
 
 
-void CMenu::gotoSecMenu()
+void CMenu::gotoParamMenu()
 {
-	
+	m_menuStat = MENU_PARAM;
+	menuOsdInit_param();
+	updateStbModeOsd();
+	updateStbFilterOsd();
+	return;
 }
 
 void CMenu::updateEnhStatOsd()
@@ -172,6 +196,53 @@ void CMenu::updateStbStatOsd()
 	return;
 }
 
+
+void CMenu::updateStbModeOsd()
+{
+	switch(m_stbmode)
+	{
+		case MODE_AUTO:
+			swprintf(disMenuBuf.osdBuffer[3].disMenu, 33, L"稳像模式   自  动");
+			break;
+		case MODE_TRANS:
+			swprintf(disMenuBuf.osdBuffer[3].disMenu, 33, L"稳像模式   平  移");
+			break;
+		case MODE_TRANSSCALE:
+			swprintf(disMenuBuf.osdBuffer[3].disMenu, 33, L"稳像模式   平移缩放");
+			break;
+		case MODE_RIGID:
+			swprintf(disMenuBuf.osdBuffer[3].disMenu, 33, L"稳像模式   刚  性");
+			break;
+		case MODE_PERSPECTIVE:
+			swprintf(disMenuBuf.osdBuffer[3].disMenu, 33, L"稳像模式   透  视");
+			break;
+		default:
+			break;
+	}
+	return;
+}
+
+void CMenu::updateStbFilterOsd()
+{
+	switch(m_stbparam)
+		{
+			case FILTER_HIGHT:
+				swprintf(disMenuBuf.osdBuffer[4].disMenu, 33, L"滤波参数    高");
+				break;
+			case FILTER_MID:
+				swprintf(disMenuBuf.osdBuffer[4].disMenu, 33, L"滤波参数    中");
+				break;
+			case FILTER_LOW:
+				swprintf(disMenuBuf.osdBuffer[4].disMenu, 33, L"滤波参数    低");
+				break;
+			default:
+				break;
+		}
+	return;
+}
+
+
+
 void CMenu::menuOsdInit_main()
 {
 	unsigned char menubuf[MAX_SUBMENU][128] = 	{"增强       ", "稳像      ","稳像配置"};
@@ -188,6 +259,26 @@ void CMenu::menuOsdInit_main()
 	}
 	return;
 }
+
+void CMenu::menuOsdInit_param()
+{
+	unsigned char menubuf[MAX_SUBMENU][128] = 	{"稳像模式    " ,"滤波参数    "};
+
+	disMenuBuf.cnt = 5;
+	for(int j = 3; j < disMenuBuf.cnt; j++)
+	{
+		disMenuBuf.osdBuffer[j].bshow = true;
+		disMenuBuf.osdBuffer[j].alpha = 2;
+		disMenuBuf.osdBuffer[j].color = 6;
+		disMenuBuf.osdBuffer[j].posx = CHARPOSX;
+		disMenuBuf.osdBuffer[j].posy = (j + 1) * CHARPOSY;
+		setlocale(LC_ALL, "zh_CN.UTF-8");
+		swprintf(disMenuBuf.osdBuffer[j].disMenu, 33, L"%s", menubuf[j]);
+	}
+
+	return;
+}
+
 
 void CMenu::menuOsdInit_blank()
 {
@@ -231,6 +322,7 @@ void CMenu::mouseMove(int xMove , int yMove)
 	switch(m_menuStat)
 	{
 		case MENU_MAIN:
+		case MENU_PARAM:
 			mouseHandle_main(xMove,yMove);
 			break;
 		

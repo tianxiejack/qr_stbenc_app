@@ -17,10 +17,26 @@
 typedef enum{
 	MENU_BLANK,
 	MENU_MAIN,
-	MENU_SEC,
+	MENU_PARAM,
 	MENU_MAX,
 }MenuState_t;
 
+
+typedef enum{
+	MODE_AUTO,
+	MODE_TRANS,
+	MODE_TRANSSCALE,
+	MODE_RIGID,
+	MODE_PERSPECTIVE,
+	MODE_MAX,
+}StbMode_t;
+
+typedef enum{
+	FILTER_HIGHT,
+	FILTER_MID,
+	FILTER_LOW,
+	FILTER_MAX,
+}StbParam_t;
 
 typedef struct
 {
@@ -54,17 +70,21 @@ public:
 
 	void gotoBlankMenu();
 	void gotoMainMenu();
-	void gotoSecMenu();
+	void gotoParamMenu();
 
 	void menuOsdInit_blank();
 	void menuOsdInit_main();
-	
+	void menuOsdInit_param();
 
 	void updateEnhStatOsd();
 	void updateStbStatOsd();
+	void updateStbModeOsd();
+	void updateStbFilterOsd();
+		
 
 	void menuhandle_main();
-	
+	void menuhandle_param();
+
 	unsigned char getIndex(int x,int y);
 
 
@@ -72,10 +92,10 @@ public:
 
 private:
 
-	bool m_enhStat,m_stbStat;
+	bool m_enhStat,m_stbStat,m_paramStat;
 	osdInfo_t disMenuBuf;
 
-	unsigned char m_menuPointer;
+	unsigned char m_menuPointer,m_stbmode,m_stbparam;
 	signed char m_menuStat;
 
 };

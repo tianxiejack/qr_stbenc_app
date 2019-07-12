@@ -95,6 +95,7 @@ public:
 	void menuBackground();
 	void eraseMenuBackground();
 
+	void printfParam();
 	void getRGBA(int color,unsigned char& r,unsigned char& g,unsigned char& b,unsigned char& a);
 
 private:

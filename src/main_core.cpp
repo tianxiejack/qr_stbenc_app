@@ -288,7 +288,7 @@ static void keyboard_event(unsigned char key, int x, int y)
 		static bool stabEnable[SYS_CHN_CNT] = {false, };
 		stabEnable[chrChId] ^= 1;
 		CORE_STAB_PARAM params;
-		params.mm = CORE_STAB_PARAM::MM_STABILIZER;
+		params.mm = CORE_STAB_PARAM::MM_HOMOGRAPHY;
 		params.bBorderTransparent = false;
 		params.cropMargin = -1.0f;
 		params.bCropMarginScale = false;

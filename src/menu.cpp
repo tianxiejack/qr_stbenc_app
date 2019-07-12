@@ -39,6 +39,19 @@ CMenu::~CMenu()
 {
 }
 
+void CMenu::printfParam()
+{
+	printf("\n************************\n");
+	printf("mm = %d \n", gparams.mm);
+	printf("noise_cov = %f \n", gparams.noise_cov);
+	printf("bBorderTransparent = %d \n", gparams.bBorderTransparent);
+	printf("cropMargin = %f \n", gparams.cropMargin);
+	printf("bCropMarginScale = %d \n", gparams.bCropMarginScale);
+	printf("bFixedPos = %d \n",gparams.bFixedPos);
+	printf("\n*********end************\n\n");
+	return;
+}
+
 void CMenu::menuBackground()
 {
 	gpatMenu->draw(true);
@@ -81,6 +94,7 @@ void CMenu::stbHandle()
 {
 	printf("m_stbStat = %d \n" , m_stbStat);
 	gcore->enableStab(m_stbStat, gparams);
+	printfParam();
 	return;
 }
 
@@ -137,6 +151,7 @@ void CMenu::setStbworkmode()
 	}
 	
 	gcore->enableStab(m_stbStat, gparams);	
+	printfParam();
 	return;
 }
 
@@ -157,9 +172,8 @@ void CMenu::setStbparam()
 		default:
 			break;
 	}
-	
-	printf("m_stbStat = %d \n" , m_stbStat);
 	gcore->enableStab(m_stbStat, gparams);	
+	printfParam();
 	return;
 }
 

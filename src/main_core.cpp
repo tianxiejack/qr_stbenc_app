@@ -613,7 +613,7 @@ int parsingComEvent(comtype_t comtype)
 void parsingframe(unsigned char *tmpRcvBuff, int sizeRcv, comtype_t comtype)
 {
 	unsigned int uartdata_pos = 0;
-	unsigned char frame_head[]={0xEB, 0x53};
+	unsigned char frame_head[]={0xEB, 0x40};
 	
 	static struct data_buf
 	{

@@ -455,7 +455,7 @@ static void keyboard_event(unsigned char key, int x, int y)
 			iMenu = 0;
 		break;
 	default:
-		printf("%s",strMenus[iMenu]);
+		//printf("%s",strMenus[iMenu]);
 		break;
 	}
 	#endif
@@ -576,13 +576,12 @@ int parsingComEvent(comtype_t comtype)
         	return ret;
     	}
     	unsigned char checkSum = recvcheck_sum(cmdLength);
-
     	if(checkSum== rcvBufQue.at(cmdLength-1))
     	{	
     		switch(rcvBufQue.at(4))
 	        {
 	            case 0x00:
-					gMenu->comsetPre(rcvBufQue.at(5));
+				gMenu->comsetPre(rcvBufQue.at(5));
 	                break;
 				case 0x01:
 					gMenu->comsetEnh(rcvBufQue.at(5));
@@ -634,22 +633,22 @@ void parsingframe(unsigned char *tmpRcvBuff, int sizeRcv, comtype_t comtype)
 
 		while (uartdata_pos< sizeRcv)
 		{
-        	if((0 == swap_data.reading) || (2 == swap_data.reading))
-       		{
-    			if(frame_head[swap_data.len] == tmpRcvBuff[uartdata_pos])
-    			{
-        			swap_data.buf[swap_data.pos++] =  tmpRcvBuff[uartdata_pos++];
-        			swap_data.len++;
-        			swap_data.reading = 2;
-        			if(swap_data.len == sizeof(frame_head)/sizeof(char))
-            				swap_data.reading = 1;
-    			}
-       		 	else
-        		{
-            		uartdata_pos++;
-            		if(2 == swap_data.reading)
-                		memset(&swap_data, 0, sizeof(struct data_buf));
-        		}
+	        	if((0 == swap_data.reading) || (2 == swap_data.reading))
+	       	{
+	    			if(frame_head[swap_data.len] == tmpRcvBuff[uartdata_pos])
+	    			{
+	        			swap_data.buf[swap_data.pos++] =  tmpRcvBuff[uartdata_pos++];
+	        			swap_data.len++;
+	        			swap_data.reading = 2;
+	        			if(swap_data.len == sizeof(frame_head)/sizeof(char))
+	            				swap_data.reading = 1;
+	    			}
+	       		else
+	        		{
+		            		uartdata_pos++;
+		            		if(2 == swap_data.reading)
+		                		memset(&swap_data, 0, sizeof(struct data_buf));
+	        		}
 			}
 		   	else if(1 == swap_data.reading)
 			{

@@ -8,7 +8,7 @@
 #ifndef MENU_HPP_
 #define MENU_HPP_
 
-#define MAX_SUBMENU 5
+#define MAX_SUBMENU 6
 
 #define OUTPUTW 1920
 #define OUTPUTH	1080
@@ -80,7 +80,8 @@ public:
 	void updateStbStatOsd();
 	void updateStbModeOsd();
 	void updateStbFilterOsd();
-		
+	void updatePrehandleOsd();
+
 
 	void menuhandle_main();
 	void menuhandle_param();
@@ -91,6 +92,8 @@ public:
 	void setStbparam();
 	void enhHandle();
 	void stbHandle();
+	void preHandle();
+
 
 	void menuBackground();
 	void eraseMenuBackground();
@@ -100,7 +103,7 @@ public:
 
 private:
 
-	bool m_enhStat,m_stbStat,m_paramStat;
+	bool m_enhStat,m_stbStat,m_paramStat,m_preStat;
 	osdInfo_t disMenuBuf;
 
 	unsigned char m_menuPointer,m_stbmode,m_stbparam;

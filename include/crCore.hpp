@@ -171,13 +171,15 @@ typedef struct _core_stab_param
 	float cropMargin;
 	bool bCropMarginScale;
 	bool bFixedPos;
+	bool bPreProcess;
 	_core_stab_param(){
-		mm = MM_STABILIZER;
-		noise_cov = 1E-6;
+		mm = MM_TRANSLATION;
+		noise_cov = 1E-4;
 		bBorderTransparent = false;
 		cropMargin = -1.0f;
 		bCropMarginScale = false;
 		bFixedPos = false;
+		bPreProcess = false;
 	}
 }CORE_STAB_PARAM;
 

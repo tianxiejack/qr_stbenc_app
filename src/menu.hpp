@@ -101,6 +101,14 @@ public:
 	void printfParam();
 	void getRGBA(int color,unsigned char& r,unsigned char& g,unsigned char& b,unsigned char& a);
 
+
+	void comsetPre(bool stat);
+	void comsetEnh(bool stat);
+	void comsetStb(bool stat);
+	void comsetStbparam_filter(char mode);
+	void comsetStbparam_mode(char mode);
+		
+	
 private:
 
 	bool m_enhStat,m_stbStat,m_paramStat,m_preStat;

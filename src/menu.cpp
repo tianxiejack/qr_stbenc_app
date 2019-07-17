@@ -100,7 +100,6 @@ void CMenu::enhHandle()
 
 void CMenu::stbHandle()
 {
-	printf("m_stbStat = %d \n" , m_stbStat);
 	gcore->enableStab(m_stbStat, gparams);
 	printfParam();
 	return;
@@ -517,6 +516,53 @@ void CMenu::getRGBA(int color,unsigned char& r,unsigned char& g,unsigned char& b
 	else
 		a = 255 - a*16;
 	return ;
+}
+
+
+void CMenu::comsetPre(bool stat)
+{
+	gparams.bPreProcess = stat;
+	preHandle();
+	updatePrehandleOsd();
+	return;
+}
+
+
+void CMenu::comsetEnh(bool stat)
+{
+	m_enhStat = stat;
+	enhHandle();
+	updateEnhStatOsd();
+	return;
+}
+
+
+void CMenu::comsetStb(bool stat)
+{
+	m_stbStat = stat;
+	stbHandle();
+	updateStbStatOsd();
+	return;
+}
+
+void CMenu::comsetStbparam_filter(char mode)
+{
+	if(mode >=0 && mode < FILTER_MAX)
+	{
+		m_stbparam = mode;
+		setStbparam();
+	}
+	return;
+}
+
+void CMenu::comsetStbparam_mode(char mode)
+{
+	if(mode >=0 && mode < MODE_MAX)
+	{
+		m_stbmode = mode;
+		setStbworkmode();
+	}
+	return;
 }
 
 

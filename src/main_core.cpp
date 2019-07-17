@@ -22,6 +22,7 @@
 #include "MultiChVideo.hpp"
 
 #include "menu.hpp"
+#include "PortFactory.hpp"
 
 
 using namespace cv;
@@ -40,7 +41,8 @@ static ICore_1001 *core = NULL;
 static CORE1001_STATS stats;
 
 static CMenu* gMenu = NULL;
-
+static CPortInterface* pCom = NULL;
+static int fduart;
 
 static void processFrame_core(int cap_chid,unsigned char *src, struct v4l2_buffer capInfo, int format)
 {
@@ -537,6 +539,157 @@ extern UTCTRACK_HANDLE g_track;
 #include "MMTD.h"
 extern CMMTD *g_mmtd;
 
+#define    RECV_BUF_SIZE   1024
+
+static bool exit_comParsing = false;
+std::vector<unsigned char>  rcvBufQue;
+
+typedef struct{
+	int fd;
+	int type;// 1. /dev/ttyTHS1   2.network
+}comtype_t;
+
+
+unsigned char recvcheck_sum(int len_t)
+{
+    unsigned char cksum = 0;
+    for(int n=4; n<len_t-1; n++)
+    {
+        cksum ^= rcvBufQue.at(n);
+    }
+    return  cksum;
+}
+
+
+int parsingComEvent(comtype_t comtype)
+{
+	int ret =  -1;
+	int cmdLength= (rcvBufQue.at(2)|rcvBufQue.at(3)<<8)+5;
+	float value;
+	unsigned char tempbuf[4];
+	unsigned char contentBuff[128]={0};
+
+	if(cmdLength<6)
+	{
+        	printf("Warning::Invaild frame\r\n");
+        	rcvBufQue.erase(rcvBufQue.begin(),rcvBufQue.begin()+cmdLength);
+        	return ret;
+    	}
+    	unsigned char checkSum = recvcheck_sum(cmdLength);
+
+    	if(checkSum== rcvBufQue.at(cmdLength-1))
+    	{	
+    		switch(rcvBufQue.at(4))
+	        {
+	            case 0x00:
+					gMenu->comsetPre(rcvBufQue.at(5));
+	                break;
+				case 0x01:
+					gMenu->comsetEnh(rcvBufQue.at(5));
+					break;
+				case 0x02:
+					gMenu->comsetStb(rcvBufQue.at(5));
+					break;
+				case 0x03:
+					gMenu->comsetStbparam_mode(rcvBufQue.at(5));
+					break;
+				case 0x04:
+					gMenu->comsetStbparam_filter(rcvBufQue.at(5));
+					break;
+	    		default:
+					printf("INFO: Unknow  Control Command, please check!!!\r\n ");
+        			ret =0;
+        			break;
+	       	}
+    	}
+    	else
+        	printf("%s,%d, checksum error:,cal is %02x,recv is %02x\n",__FILE__,__LINE__,checkSum,rcvBufQue.at(cmdLength-1));
+		
+	rcvBufQue.erase(rcvBufQue.begin(),rcvBufQue.begin()+cmdLength);
+	return 1;
+}
+
+
+void parsingframe(unsigned char *tmpRcvBuff, int sizeRcv, comtype_t comtype)
+{
+	unsigned int uartdata_pos = 0;
+	unsigned char frame_head[]={0xEB, 0x53};
+	
+	static struct data_buf
+	{
+		unsigned int len;
+		unsigned int pos;
+		unsigned char reading;
+		unsigned char buf[RECV_BUF_SIZE];
+	}swap_data = {0, 0, 0,{0}};
+
+
+	uartdata_pos = 0;
+	if(sizeRcv>0)
+	{
+		printf("------------------(fd:%d)start recv date---------------------\n", comtype.fd);
+		for(int j=0;j<sizeRcv;j++)
+			printf("%02x ",tmpRcvBuff[j]);
+		printf("\n");
+
+		while (uartdata_pos< sizeRcv)
+		{
+        	if((0 == swap_data.reading) || (2 == swap_data.reading))
+       		{
+    			if(frame_head[swap_data.len] == tmpRcvBuff[uartdata_pos])
+    			{
+        			swap_data.buf[swap_data.pos++] =  tmpRcvBuff[uartdata_pos++];
+        			swap_data.len++;
+        			swap_data.reading = 2;
+        			if(swap_data.len == sizeof(frame_head)/sizeof(char))
+            				swap_data.reading = 1;
+    			}
+       		 	else
+        		{
+            		uartdata_pos++;
+            		if(2 == swap_data.reading)
+                		memset(&swap_data, 0, sizeof(struct data_buf));
+        		}
+			}
+		   	else if(1 == swap_data.reading)
+			{
+				swap_data.buf[swap_data.pos++] = tmpRcvBuff[uartdata_pos++];
+				swap_data.len++;
+				if(swap_data.len>=4)
+				{
+					if(swap_data.len==((swap_data.buf[2]|(swap_data.buf[3]<<8))+5))
+					{
+						for(int i=0;i<swap_data.len;i++)
+							rcvBufQue.push_back(swap_data.buf[i]);
+
+						parsingComEvent(comtype);
+						memset(&swap_data, 0, sizeof(struct data_buf));
+					}
+				}
+			}
+		}
+	}
+	return;
+}
+
+
+void* thread_comrecvEvent(void *p)
+{
+	int sizeRcv;
+ 	uint8_t dest[1024]={0};
+	int read_status = 0;
+	int dest_cnt = 0;
+	unsigned char  tmpRcvBuff[RECV_BUF_SIZE];
+	memset(tmpRcvBuff,0,sizeof(tmpRcvBuff));
+
+	while(!exit_comParsing)
+	{
+		sizeRcv= pCom->crecv(fduart, (void *)tmpRcvBuff,RECV_BUF_SIZE);
+		comtype_t comtype = {fduart, 1};
+		parsingframe(tmpRcvBuff, sizeRcv, comtype);
+	}
+	return NULL;
+}
 
 
 
@@ -571,8 +724,15 @@ int main_core(int argc, char **argv)
 	MultiCh.creat();
 	MultiCh.run();
 	core->enableOSD(false);
-		
+
 	gMenu = new CMenu((void*)core);
+
+	pCom = PortFactory::createProduct(3);
+	fduart = pCom->copen();
+	OSA_ThrHndl thrHandleDataIn;
+	if(pCom != NULL)
+		OSA_thrCreate(&thrHandleDataIn, thread_comrecvEvent,  0, 0, 0);
+		
 
 	if(initParam.bRender){
 		start_thread(thrdhndl_keyevent, &initParam.bRender);

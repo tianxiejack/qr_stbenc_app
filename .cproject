@@ -34,6 +34,7 @@
 									<listOptionValue builtIn="false" value="../include/osa"/>
 									<listOptionValue builtIn="false" value="../src"/>
 									<listOptionValue builtIn="false" value="../src/capture"/>
+									<listOptionValue builtIn="false" value="../src/comm"/>
 								</option>
 								<option id="nvcc.compiler.undef.symbol.1686673775" name="Undefined symbols (-U)" superClass="nvcc.compiler.undef.symbol"/>
 								<option id="nvcc.compiler.cpp11option.1427451339" name="Enable C++11 support (-std=c++11)" superClass="nvcc.compiler.cpp11option" value="true" valueType="boolean"/>
@@ -78,6 +79,7 @@
 									<listOptionValue builtIn="false" value="gstpbutils-1.0"/>
 									<listOptionValue builtIn="false" value="crcore2"/>
 									<listOptionValue builtIn="false" value="visionworks"/>
+									<listOptionValue builtIn="false" value="crvxEnhance"/>
 									<listOptionValue builtIn="false" value="crvxMotionComp"/>
 								</option>
 								<option id="nvcc.linker.option.paths.687332063" name="Library search path (-L)" superClass="nvcc.linker.option.paths" valueType="libPaths">
@@ -138,6 +140,7 @@
 									<listOptionValue builtIn="false" value="../include/osa"/>
 									<listOptionValue builtIn="false" value="../src"/>
 									<listOptionValue builtIn="false" value="../src/capture"/>
+									<listOptionValue builtIn="false" value="../src/comm"/>
 								</option>
 								<option id="nvcc.compiler.deviceDebug.1953547473" name="Generate device debug information (-G)" superClass="nvcc.compiler.deviceDebug"/>
 								<option id="nvcc.compiler.option.level.186819293" name="Generate host debug information (-g)" superClass="nvcc.compiler.option.level"/>

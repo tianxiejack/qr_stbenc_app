@@ -551,6 +551,7 @@ void CMenu::comsetStbparam_filter(char mode)
 	{
 		m_stbparam = mode;
 		setStbparam();
+		updateStbFilterOsd();
 	}
 	return;
 }
@@ -561,6 +562,7 @@ void CMenu::comsetStbparam_mode(char mode)
 	{
 		m_stbmode = mode;
 		setStbworkmode();
+		updateStbModeOsd();
 	}
 	return;
 }

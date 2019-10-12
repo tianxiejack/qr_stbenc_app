@@ -23,7 +23,7 @@
 
 #include "menu.hpp"
 #include "PortFactory.hpp"
-
+#include "Capture.hpp"
 
 using namespace cv;
 
@@ -36,6 +36,8 @@ using namespace cv;
 #define BLUECOLOR		0x006EF029
 #define BLACKCOLOR		0x00808010
 #define BLANKCOLOR		0x00000000
+
+#define RTSPADDRESS    "rtsp://admin:admin$2018@192.168.0.66:554/h264/ch0/main/av_stream"
 
 static ICore_1001 *core = NULL;
 static CORE1001_STATS stats;
@@ -56,8 +58,7 @@ static void processFrame_core(int cap_chid,unsigned char *src, struct v4l2_buffe
 			cv::Mat frame;
 			if(format == V4L2_PIX_FMT_GREY){
 				frame = cv::Mat(SYS_CHN_HEIGHT(cap_chid), SYS_CHN_WIDTH(cap_chid), CV_8UC1, src);
-			}else{
-				OSA_assert(format == V4L2_PIX_FMT_YUYV);
+			}else if(format == V4L2_PIX_FMT_YUYV || format == V4L2_PIX_FMT_UYVY){
 				frame = cv::Mat(SYS_CHN_HEIGHT(cap_chid), SYS_CHN_WIDTH(cap_chid)*2, CV_8UC1, src);
 			}
 			#if 0
@@ -690,6 +691,33 @@ void* thread_comrecvEvent(void *p)
 	return NULL;
 }
 
+void processFrame(const cv::Mat frame,const int chId)
+{
+	#if 0
+	printf("w,h = %d ,%d ,channel = %d \n", frame.cols,frame.rows , frame.channels());
+	printf("--------------\n");
+	Mat dst;
+	cvtColor(frame, dst, COLOR_YUV2BGR_UYVY);
+	cv::imshow("test", dst);
+	cv::waitKey(1);
+	#endif
+
+
+	//Mat dst;
+	//cvtColor(frame, dst, COLOR_YUV2BGR_UYVY);
+	//printf("------------+++++-----------------------------------------\n");
+
+	struct v4l2_buffer buf;
+	memset(&buf, 0, sizeof(buf));
+	buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+	buf.memory = V4L2_MEMORY_USERPTR;//V4L2_MEMORY_MMAP
+
+	int format = V4L2_PIX_FMT_UYVY;
+	buf.flags = 8196;
+
+	processFrame_core(chId, frame.data, buf, format);
+	return;
+}
 
 
 int main_core(int argc, char **argv)
@@ -707,7 +735,7 @@ int main_core(int argc, char **argv)
 	}
 	initParam.chnInfo[1].bZoomRender = true;
 	initParam.chnInfo[1].zoomRatio.x = 1.0;
-	initParam.chnInfo[1].zoomRatio.y = 1.0;
+	initParam.chnInfo[1].zoomRatio.y =  1.0;
 	initParam.bRender = true;
 	initParam.bEncoder = false;
 	initParam.bHideOSD = true;
@@ -717,12 +745,19 @@ int main_core(int argc, char **argv)
 	core->setHideSysOsd(mask);
 	//glClearColor(0.0,1.0,0,1.0);
 
-	MultiChVideo MultiCh;
-	MultiCh.m_user = NULL;
-	MultiCh.m_usrFunc = callback_process;
-	MultiCh.creat();
-	MultiCh.run();
+//	MultiChVideo MultiCh;
+//	MultiCh.m_user = NULL;
+//	MultiCh.m_usrFunc = callback_process;
+//	MultiCh.creat();
+//	MultiCh.run();
 	core->enableOSD(false);
+
+	Capture* rtp0 = RTSPCapture_Create();
+	std::string rtspAddress;
+	rtspAddress.clear();
+	rtspAddress = RTSPADDRESS;
+
+	rtp0->init(rtspAddress.c_str(),0,1920,1080,processFrame);
 
 	gMenu = new CMenu((void*)core);
 
@@ -751,5 +786,4 @@ int main_core(int argc, char **argv)
 
 	return 0;
 }
-
 

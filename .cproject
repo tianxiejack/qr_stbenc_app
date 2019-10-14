@@ -38,6 +38,9 @@
 								</option>
 								<option id="nvcc.compiler.undef.symbol.1686673775" name="Undefined symbols (-U)" superClass="nvcc.compiler.undef.symbol"/>
 								<option id="nvcc.compiler.cpp11option.1427451339" name="Enable C++11 support (-std=c++11)" superClass="nvcc.compiler.cpp11option" value="true" valueType="boolean"/>
+								<option id="nvcc.compiler.def.symbols.1498255160" name="Defined symbols (-D)" superClass="nvcc.compiler.def.symbols" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="linux"/>
+								</option>
 								<inputType id="nvcc.compiler.input.cu.1597305464" superClass="nvcc.compiler.input.cu"/>
 								<inputType id="nvcc.compiler.input.cpp.850403190" superClass="nvcc.compiler.input.cpp"/>
 								<inputType id="nvcc.compiler.input.c.515756950" superClass="nvcc.compiler.input.c"/>

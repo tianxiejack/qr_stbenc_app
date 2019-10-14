@@ -719,6 +719,75 @@ void processFrame(const cv::Mat frame,const int chId)
 	return;
 }
 
+int setInputWay()
+{
+	std::string cfgAvtFile;
+	char avt[30] = "cfg_";
+	cfgAvtFile = "Profile.yml";
+	FILE *fp = fopen(cfgAvtFile.c_str(), "rt");
+
+	if(fp != NULL)
+	{
+		fseek(fp, 0, SEEK_END);
+		int len = ftell(fp);
+		fclose(fp);
+		if(len < 10) return  -1;
+		else
+		{
+			FileStorage fr(cfgAvtFile, FileStorage::READ);
+			if(fr.isOpened())
+			{
+				sprintf(avt, "cfg_choose");
+				int choose = (int)fr[avt];
+
+				printf("++---------------%d\n",choose);
+				return choose;
+			}
+		}
+	}
+}
+
+
+void setOnvif()
+{
+	std::string cfgAvtFile;
+	char avt[30] = "";
+	cfgAvtFile = "Profile.yml";
+	FILE *fp = fopen(cfgAvtFile.c_str(), "rt");
+
+	if(fp != NULL)
+	{
+		fseek(fp, 0, SEEK_END);
+		int len = ftell(fp);
+		fclose(fp);
+		if(len < 10) return ;
+		else
+		{
+			FileStorage fr(cfgAvtFile, FileStorage::READ);
+			if(fr.isOpened())
+			{
+				sprintf(avt, "cfg_ONVIF_url");
+				std::string urlAdress = (string)fr[avt];
+				sprintf(avt,"cfg_ONVIF_channel");
+				int channel = (int)fr[avt];
+
+				Capture* rtp0 = RTSPCapture_Create();
+				rtp0->init(urlAdress.c_str(),channel,1920,1080,processFrame);
+
+				printf("%s---------------%d\n",urlAdress,channel);
+			}
+		}
+	}
+}
+
+void setSDI()
+{
+	MultiChVideo *MultiCh = new MultiChVideo;
+	MultiCh->m_user = NULL;
+	MultiCh->m_usrFunc = callback_process;
+	MultiCh->creat();
+	MultiCh->run();
+}
 
 int main_core(int argc, char **argv)
 {
@@ -745,6 +814,10 @@ int main_core(int argc, char **argv)
 	core->setHideSysOsd(mask);
 	//glClearColor(0.0,1.0,0,1.0);
 
+	int choose = setInputWay();
+	if (choose == 0) setSDI();
+	else if (choose == 1) setOnvif();
+
 //	MultiChVideo MultiCh;
 //	MultiCh.m_user = NULL;
 //	MultiCh.m_usrFunc = callback_process;
@@ -752,12 +825,12 @@ int main_core(int argc, char **argv)
 //	MultiCh.run();
 	core->enableOSD(false);
 
-	Capture* rtp0 = RTSPCapture_Create();
-	std::string rtspAddress;
-	rtspAddress.clear();
-	rtspAddress = RTSPADDRESS;
-
-	rtp0->init(rtspAddress.c_str(),0,1920,1080,processFrame);
+//	Capture* rtp0 = RTSPCapture_Create();
+//	std::string rtspAddress;
+//	rtspAddress.clear();
+//	rtspAddress = RTSPADDRESS;
+//
+//	rtp0->init(rtspAddress.c_str(),0,1920,1080,processFrame);
 
 	gMenu = new CMenu((void*)core);
 

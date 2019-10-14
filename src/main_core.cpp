@@ -37,7 +37,6 @@ using namespace cv;
 #define BLACKCOLOR		0x00808010
 #define BLANKCOLOR		0x00000000
 
-#define RTSPADDRESS    "rtsp://admin:admin$2018@192.168.0.66:554/h264/ch0/main/av_stream"
 
 static ICore_1001 *core = NULL;
 static CORE1001_STATS stats;
@@ -740,7 +739,7 @@ int setInputWay()
 				sprintf(avt, "cfg_choose");
 				int choose = (int)fr[avt];
 
-				printf("++---------------%d\n",choose);
+				//printf("++---------------%d\n",choose);
 				return choose;
 			}
 		}
@@ -774,7 +773,7 @@ void setOnvif()
 				Capture* rtp0 = RTSPCapture_Create();
 				rtp0->init(urlAdress.c_str(),channel,1920,1080,processFrame);
 
-				printf("%s---------------%d\n",urlAdress,channel);
+				//printf("%s---------------%d\n",urlAdress,channel);
 			}
 		}
 	}
@@ -814,23 +813,12 @@ int main_core(int argc, char **argv)
 	core->setHideSysOsd(mask);
 	//glClearColor(0.0,1.0,0,1.0);
 
+	//added by zyb 20191014
 	int choose = setInputWay();
 	if (choose == 0) setSDI();
 	else if (choose == 1) setOnvif();
 
-//	MultiChVideo MultiCh;
-//	MultiCh.m_user = NULL;
-//	MultiCh.m_usrFunc = callback_process;
-//	MultiCh.creat();
-//	MultiCh.run();
 	core->enableOSD(false);
-
-//	Capture* rtp0 = RTSPCapture_Create();
-//	std::string rtspAddress;
-//	rtspAddress.clear();
-//	rtspAddress = RTSPADDRESS;
-//
-//	rtp0->init(rtspAddress.c_str(),0,1920,1080,processFrame);
 
 	gMenu = new CMenu((void*)core);
 
